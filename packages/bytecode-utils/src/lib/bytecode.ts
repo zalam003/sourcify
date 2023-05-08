@@ -9,9 +9,21 @@ type CBOR = {
 
 // eslint-disable-next-line functional/no-mixed-type
 type DecodedObject = {
-  ipfs?: string;
-  solcVersion?: string;
-  [key: string]: string | Uint8Array | undefined | boolean;
+  raw: {
+    ipfs?: string;
+    bzzr0?: string;
+    bzzr1?: string;
+    solc?: string;
+    [key: string]: string | Uint8Array | undefined | boolean;
+  };
+  decoded: {
+    ipfs?: string;
+    bzzr0?: string;
+    bzzr1?: string;
+    solc?: string;
+    [key: string]: string | Uint8Array | undefined | boolean;
+  };
+  metadataOrigin?: 'ipfs' | 'bzzr0' | 'bzzr1';
 };
 
 /**
@@ -37,37 +49,52 @@ export const decode = (bytecode: string): DecodedObject => {
   // cbor decode the object and get a json
   const cborDecodedObject = CBOR.decode(arrayify(`0x${auxdata}`));
 
-  const result: DecodedObject = {};
+  const result: DecodedObject = {
+    raw: {},
+    decoded: {},
+  };
 
   // Decode all the parameters from the json
-  Object.keys(cborDecodedObject).forEach((key: string) => {
-    switch (key) {
-      case 'ipfs': {
-        const ipfsCID = bs58.encode(cborDecodedObject.ipfs);
-        result.ipfs = ipfsCID;
-        break;
-      }
-      case 'solc': {
-        // nightly builds are string encoded
-        if (typeof cborDecodedObject.solc === 'string') {
-          result.solcVersion = cborDecodedObject.solc;
-        } else {
-          result.solcVersion = cborDecodedObject.solc.join('.');
+  Object.keys(cborDecodedObject)
+    .filter((key) => key != 'cbor')
+    .forEach((key: string) => {
+      switch (key) {
+        case 'ipfs': {
+          result.raw.ipfs = hexlify(cborDecodedObject.ipfs);
+          const ipfsCID = bs58.encode(cborDecodedObject.ipfs);
+          result.decoded.ipfs = ipfsCID;
+          result.metadataOrigin = 'ipfs';
+          break;
         }
-        break;
+        case 'solc': {
+          result.raw.solc = hexlify(cborDecodedObject.solc);
+          // nightly builds are string encoded
+          if (typeof cborDecodedObject.solc === 'string') {
+            result.decoded.solc = cborDecodedObject.solc;
+          } else {
+            result.decoded.solc = cborDecodedObject.solc.join('.');
+          }
+          break;
+        }
+        case 'experimental': {
+          result.raw.experimental = cborDecodedObject.experimental;
+          result.decoded.experimental = cborDecodedObject.experimental;
+          break;
+        }
+        case 'bzzr0':
+        case 'bzzr1': {
+          result.metadataOrigin = key;
+          result.raw[key] = hexlify(cborDecodedObject[key]);
+          result.decoded[key] = hexlify(cborDecodedObject[key]);
+          break;
+        }
+        default: {
+          result.raw[key] = hexlify(cborDecodedObject[key]);
+          result.decoded[key] = hexlify(cborDecodedObject[key]);
+          break;
+        }
       }
-      case 'experimental': {
-        result.experimental = cborDecodedObject.experimental;
-        break;
-      }
-      case 'bzzr0':
-      case 'bzzr1':
-      default: {
-        result[key] = hexlify(cborDecodedObject[key]);
-        break;
-      }
-    }
-  });
+    });
 
   return result;
 };

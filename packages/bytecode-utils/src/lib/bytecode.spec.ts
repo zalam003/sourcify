@@ -40,20 +40,21 @@ test('split succesfully bytecode into execution bytecode and auxadata', (t) => {
 
 test('bytecode decode cbor with `ipfs` property', (t) => {
   t.is(
-    decode(BYTECODE_IPFS).ipfs,
+    decode(BYTECODE_IPFS).decoded.ipfs,
     'QmdD3hpMj6mEFVy9DP4QqjHaoeYbhKsYvApX1YZNfjTVWp'
   );
 });
 
 test('bytecode decode cbor with `bzzr1` property', (t) => {
   t.is(
-    decode(BYTECODE_BZZR1).bzzr1,
+    decode(BYTECODE_BZZR1).decoded.bzzr1,
     '0x71e0c183217ae3e9a1406ae7b58c2f36e09f2b16b10e19d46ceb821f3ee6abad'
   );
 });
 
 test('bytecode decode cbor with `experimental` property', (t) => {
-  t.is(decode(BYTECODE_EXPERIMENTAL).experimental, true);
+  console.log(decode(BYTECODE_EXPERIMENTAL));
+  t.is(decode(BYTECODE_EXPERIMENTAL).decoded.experimental, true);
 });
 
 test('bytecode decode should fail gracefully when input is undefined', (t) => {
@@ -66,7 +67,7 @@ test('bytecode decode should fail gracefully when input is undefined', (t) => {
 
 test('decode a bytecode not starting with 0x', (t) => {
   t.is(
-    decode(BYTECODE_WITHOUT0X).ipfs,
+    decode(BYTECODE_WITHOUT0X).decoded.ipfs,
     'QmbFc3AoHDC977j2UH2WwYSwsSRrBGj8bsiiyigXhHzyuZ'
   );
 });
