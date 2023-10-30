@@ -24,7 +24,6 @@ import { ISolidityCompiler } from './ISolidityCompiler';
 
 // TODO: find a better place for these constants. Reminder: this sould work also in the browser
 const IPFS_PREFIX = 'dweb:/ipfs/';
-const FETCH_TIMEOUT = parseInt(process.env.FETCH_TIMEOUT || '') || 3000; // ms
 /**
  * Abstraction of a checked solidity contract. With metadata and source (solidity) files.
  */
@@ -445,21 +444,21 @@ export class CheckedContract {
  * @param log whether or not to log
  * @returns the fetched file if found; null otherwise
  */
+// TODO @lib-sourcify-without-solc handle timeout from outside lib-sourcify
 export async function performFetch(
   url: string,
   hash?: string,
-  fileName?: string
+  fileName?: string,
+  timeout: number = 3000
 ): Promise<string | null> {
   logInfo(`Fetching the file ${fileName} from ${url}...`);
-  const res = await fetchWithTimeout(url, { timeout: FETCH_TIMEOUT }).catch(
-    (err) => {
-      if (err.type === 'aborted')
-        logWarn(
-          `Fetching the file ${fileName} from ${url} timed out. Timeout: ${FETCH_TIMEOUT}ms`
-        );
-      else logError(err);
-    }
-  );
+  const res = await fetchWithTimeout(url, { timeout }).catch((err) => {
+    if (err.type === 'aborted')
+      logWarn(
+        `Fetching the file ${fileName} from ${url} timed out. Timeout: ${timeout}ms`
+      );
+    else logError(err);
+  });
 
   if (res) {
     if (res.status === 200) {
@@ -597,8 +596,9 @@ function createJsonInputFromMetadata(
  *
  * This will likely moved to server or somewhere else. But keep it here for now.
  */
+// TODO @lib-sourcify-without-solc handle custom IPFS Gateway
 export function getIpfsGateway(): string {
-  return process.env.IPFS_GATEWAY || 'https://ipfs.io/ipfs/';
+  return 'https://ipfs.io/ipfs/';
 }
 
 export const findContractPathFromContractName = (

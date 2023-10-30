@@ -1,5 +1,4 @@
 import {
-  checkPaths,
   extractHardhatMetadataAndSources,
   pathContentArrayToStringMap,
   unzipFiles,

@@ -6,7 +6,8 @@ export interface ILogger {
 
 // Default logger behavior
 export const DefaultLogger: ILogger = {
-  logLevel: process.env.NODE_ENV === 'production' ? 2 : 4,
+  // TODO @lib-sourcify-without-solc handle custom logLevel (this to be done in server)
+  logLevel: 2,
   setLevel(level: number) {
     this.logLevel = level;
   },

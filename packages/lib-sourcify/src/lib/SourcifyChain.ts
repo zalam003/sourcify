@@ -9,9 +9,8 @@ import {
 import { Chain, SourcifyChainExtension } from './types';
 import { logError, logInfo, logWarn } from './logger';
 
-const RPC_TIMEOUT = process.env.RPC_TIMEOUT
-  ? parseInt(process.env.RPC_TIMEOUT)
-  : 10 * 1000;
+// TODO @lib-sourcify-without-solc handle custom RPC_TIMEOUT
+const RPC_TIMEOUT = 10 * 1000;
 
 // It is impossible to get the url from the Provider for logging purposes
 interface JsonRpcProviderWithUrl extends JsonRpcProvider {
